@@ -1,0 +1,44 @@
+{
+  "name": "flogo-inference",
+  "type": "flogo:activity",
+  "ref": "github.com/TIBCOSoftware/flogo-contrib/activity/inference",
+  "version": "0.0.1",
+  "title": "Invoke ML Model",
+  "description": "Basic inferencing activity to invoke ML model using the flogo-ml framework.",
+  "homepage": "https://github.com/TIBCOSoftware/flogo-contrib/tree/master/activity/inference",
+  "input":[
+    {
+        "name": "model",
+        "type": "string",
+        "required": true
+    },
+    {
+        "name": "features",
+        "type": "array",
+        "required": true
+    },
+    {
+        "name": "framework",
+        "type": "string",
+        "required": true
+    },
+    {
+        "name": "sigDefName",
+        "type": "string",
+        "required": false,
+        "value":"serving_default"
+    },
+    {
+        "name": "tag",
+        "type": "string",
+        "required": false,
+        "value":"serve"
+    }
+  ],
+  "output": [
+    {
+      "name": "result",
+      "type": "object"
+    }
+  ]
+}
