@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/project-flogo/contrib/activity/inference/utils"
+	"github.com/project-flogo/ml/activity/inference/utils"
 )
 
 // Framework interface used to implement specific ml framework implementations

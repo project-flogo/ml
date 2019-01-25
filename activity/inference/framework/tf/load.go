@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	models "github.com/project-flogo/contrib/activity/inference/model"
-	tfpb "github.com/project-flogo/contrib/activity/inference/tensorflow/tensorflow/core/protobuf"
+	models "github.com/project-flogo/ml/activity/inference/model"
+	tfpb "github.com/project-flogo/ml/activity/inference/tensorflow/tensorflow/core/protobuf"
 	"github.com/golang/protobuf/proto"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 )

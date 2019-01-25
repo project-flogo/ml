@@ -3,7 +3,7 @@ package framework
 import (
 	"sync"
 
-	"github.com/project-flogo/contrib/activity/inference/model"
+	"github.com/project-flogo/ml/activity/inference/model"
 )
 
 var (

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/proto"
-	models "github.com/project-flogo/contrib/activity/inference/model"
+	models "github.com/project-flogo/ml/activity/inference/model"
 	"github.com/project-flogo/core/support/log"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 )
