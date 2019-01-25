@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/project-flogo/contrib/activity/inference/framework/tf"
+	"github.com/project-flogo/ml/activity/inference/framework/tf"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data/mapper"
 	"github.com/project-flogo/core/data/resolve"
