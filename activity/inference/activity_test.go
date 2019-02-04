@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/project-flogo/ml/activity/inference/framework/tf"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data/mapper"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support/test"
+	"github.com/project-flogo/ml/activity/inference/framework/tf"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,8 +67,10 @@ func TestDNNEstimator(t *testing.T) {
 	tc.SetInput("sigDefName", "serving_default")
 	tc.SetInput("tag", "serve")
 	tc.SetInput("features", featuresB)
+	fmt.Println("blah")
 
 	done, err = act.Eval(tc)
+	fmt.Println("blah")
 	if done == false {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
