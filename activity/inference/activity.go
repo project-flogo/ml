@@ -64,8 +64,6 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	features := context.GetInput(ivFeatures).([]interface{})
 	fw := context.GetInput(ivFramework).(string)
 
-	fmt.Println("HHHHHH")
-
 	tfFramework := framework.Get(fw)
 	fmt.Println(tfFramework.FrameworkTyp())
 	if tfFramework == nil {
@@ -73,22 +71,20 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 
 		return false, fmt.Errorf("%s framework not registered", fw)
 	}
-	fmt.Println("KDSJHFSDI")
-	// log.Debugf("Loaded Framework: " + tfFramework.FrameworkTyp())
-	fmt.Println("JJJJ")
+	log.Debugf("Loaded Framework: " + tfFramework.FrameworkTyp())
+
 	// Defining the flags to be used to load model
 	flags := model.ModelFlags{
 		Tag:    context.GetInput("tag").(string),
 		SigDef: context.GetInput("sigDefName").(string),
 	}
 
-	fmt.Println("PPPPPO")
 	// if modelmap does not exist then make it
 	if tfmodelmap == nil {
 		tfmodelmap = make(map[string]*model.Model)
 		log.Info("Making map of models with keys of 'ModelKey'.")
 	}
-	fmt.Println("ksadjhfsd")
+
 	// check if this instance of tf model already exists if not load it
 	modelKey := context.ActivityHost().Name() + ":" + context.Name() + context.GetInput("model").(string)
 	log.Info("ModelKey is:", modelKey)
