@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/project-flogo/ml/activity/inference/framework/tf"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data/mapper"
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support/test"
+	"github.com/project-flogo/ml/activity/inference/framework/tf"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,61 +67,7 @@ func TestDNNEstimator(t *testing.T) {
 	tc.SetInput("sigDefName", "serving_default")
 	tc.SetInput("tag", "serve")
 	tc.SetInput("features", featuresB)
-
-	done, err = act.Eval(tc)
-	if done == false {
-		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
-	} else {
-		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
-	}
-}
-
-/*
-func TestCreate(t *testing.T) {
-
-
-
-	if act == nil {
-		t.Error("Activity Not Created")
-		t.Fail()
-		return
-	}
-}
-func TestDNNEstimator(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Failed()
-			t.Errorf("panic during execution: %v", r)
-		}
-	}()
-
-	act := NewActivity(getActivityMetadata())
-	tc := test.NewTestActivityContext(getActivityMetadata())
-
-	var done bool
-	var err error
-
-	// Unit test of Estimator DNN Regressor model
-	fmt.Println("Unit test of Estimator Regressor model")
-	tc.SetInput("model", "testModels/Archive_estDNNrgr.zip")
-	tc.SetInput("inputName", "inputs")
-	var estInputsB = make(map[string]interface{})
-	estInputsB["one"] = 0.140586
-	estInputsB["two"] = 0.140586
-	estInputsB["three"] = 0.140586
-	estInputsB["label"] = 0.
-
-	var featuresB []interface{}
-	featuresB = append(featuresB, map[string]interface{}{
-		"name": "inputs",
-		"data": estInputsB,
-	})
-
-	tc.SetInput("inputName", "inputs")
-	tc.SetInput("framework", "Tensorflow")
-	tc.SetInput("sigDefName", "serving_default")
-	tc.SetInput("tag", "serve")
-	tc.SetInput("features", featuresB)
+	fmt.Println("blah")
 
 	done, err = act.Eval(tc)
 	if done == false {
@@ -132,18 +78,15 @@ func TestDNNEstimator(t *testing.T) {
 }
 
 func TestEstimatorLinearRegressor(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Failed()
-			t.Errorf("panic during execution: %v", r)
-		}
-	}()
-
-	act := NewActivity(getActivityMetadata())
-	tc := test.NewTestActivityContext(getActivityMetadata())
 
 	var done bool
 	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
 
 	// Unit test of Estimator Linear Regressor model
 	fmt.Println("Unit test of Linear Regressor Estimator model")
@@ -177,18 +120,15 @@ func TestEstimatorLinearRegressor(t *testing.T) {
 }
 
 func TestPairwaiseMul(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Failed()
-			t.Errorf("panic during execution: %v", r)
-		}
-	}()
-
-	act := NewActivity(getActivityMetadata())
-	tc := test.NewTestActivityContext(getActivityMetadata())
 
 	var done bool
 	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
 
 	// Unit test of Pairwaise Multiplication model
 	fmt.Println("Unit test of Pairwaise Multiplication model")
@@ -221,19 +161,16 @@ func TestPairwaiseMul(t *testing.T) {
 	}
 }
 
-func TestCNNMOdel(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Failed()
-			t.Errorf("panic during execution: %v", r)
-		}
-	}()
-
-	act := NewActivity(getActivityMetadata())
-	tc := test.NewTestActivityContext(getActivityMetadata())
+func TestCNNModel(t *testing.T) {
 
 	var done bool
 	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
 
 	// Unit test ofSimple CNN model
 	fmt.Println("Unit test of simple CNN model")
@@ -267,18 +204,15 @@ func TestCNNMOdel(t *testing.T) {
 }
 
 func TestEstimatorClassifier(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Failed()
-			t.Errorf("panic during execution: %v", r)
-		}
-	}()
-
-	act := NewActivity(getActivityMetadata())
-	tc := test.NewTestActivityContext(getActivityMetadata())
 
 	var done bool
 	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
 
 	// Unit test of Estimator Classifier model
 	fmt.Println("Unit test of Estimator Classifier model")
@@ -309,4 +243,16 @@ func TestEstimatorClassifier(t *testing.T) {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
 	}
 }
-*/
+
+func TestCreate(t *testing.T) {
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, _ := New(iCtx)
+
+	if act == nil {
+		t.Error("Activity Not Created")
+		t.Fail()
+		return
+	}
+}

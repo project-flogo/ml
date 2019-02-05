@@ -5,10 +5,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/ml/activity/inference/framework"
 	"github.com/project-flogo/ml/activity/inference/framework/tf"
 	"github.com/project-flogo/ml/activity/inference/model"
-	"github.com/project-flogo/core/activity"
 )
 
 var _ tf.TensorflowModel
@@ -65,7 +65,7 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	fw := context.GetInput(ivFramework).(string)
 
 	tfFramework := framework.Get(fw)
-	// fmt.Println(tfFramework.FrameworkTyp())
+	fmt.Println(tfFramework.FrameworkTyp())
 	if tfFramework == nil {
 		log.Errorf("%s framework not registered", fw)
 
