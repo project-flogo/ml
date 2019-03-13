@@ -6,4 +6,3 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/tensorflow/tensorflow v1.12.0
 )
-
