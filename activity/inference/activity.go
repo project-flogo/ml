@@ -29,7 +29,7 @@ const (
 	ovResult = "result"
 )
 
-var activityMd = activity.ToMetadata(&Input{})
+var activityMd = activity.ToMetadata(&Input{}, &Output{})
 
 func init() {
 	activity.Register(&Activity{}, New)
@@ -65,7 +65,7 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	fw := context.GetInput(ivFramework).(string)
 
 	tfFramework := framework.Get(fw)
-	fmt.Println(tfFramework.FrameworkTyp())
+	log.Debugf("Using Framework %s", tfFramework.FrameworkTyp())
 	if tfFramework == nil {
 		log.Errorf("%s framework not registered", fw)
 
@@ -133,6 +133,7 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 		for i := 0; i < len(classes); i++ {
 			out[classes[i]] = scores[i]
 		}
+
 		context.SetOutput(ovResult, out)
 	} else {
 		context.SetOutput(ovResult, output)
