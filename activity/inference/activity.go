@@ -121,7 +121,7 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	output, err := tfmodelmap[modelKey].Run(tfFramework)
 	modelRunMutex.Unlock()
 	if err != nil {
-		fmt.Println("ERROR: ", err)
+		log.Errorf("Error running the ml framework: %s", err)
 		return true, err
 	}
 
