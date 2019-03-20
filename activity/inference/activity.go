@@ -126,7 +126,7 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	}
 
 	log.Debug("Model execution completed with result:")
-	log.Info(output)
+	log.Debug(output)
 
 
 	if strings.Contains(tfmodelmap[modelKey].Metadata.Method, "tensorflow/serving/classify") {
