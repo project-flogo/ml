@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/proto"
-	models "github.com/project-flogo/ml/activity/inference/model"
 	"github.com/project-flogo/core/support/log"
+	models "github.com/project-flogo/ml/activity/inference/model"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 )
 
@@ -52,12 +52,8 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		case reflect.Slice, reflect.Array:
 			shape := model.Metadata.Inputs.Features[inputName].Shape
 			typ := model.Metadata.Inputs.Features[inputName].Type
-			data, err := checkDataTypes(model.Inputs[inputName], shape, typ, inputName)
-			if err != nil {
-				return nil, err
-			}
 
-			inputs[inputMap.Output(0)], err = tf.NewTensor(data)
+			inputs[inputMap.Output(0)], err = coerce2RankTypeTensorFlow(model.Inputs[inputName], shape, typ)
 			if err != nil {
 				return nil, err
 			}

@@ -58,7 +58,6 @@ func (a *Activity) Metadata() *activity.Metadata {
 
 // Eval implements api.Activity.Eval - Runs an ML model
 func (a *Activity) Eval(context activity.Context) (done bool, err error) {
-
 	log := context.Logger()
 	modelName := context.GetInput(ivModel).(string)
 	features := context.GetInput(ivFeatures).([]interface{})
@@ -69,7 +68,7 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	if tfFramework == nil {
 		log.Errorf("%s framework not registered", fw)
 
-		return false, fmt.Errorf("%s framework not registered", fw)
+		return true, fmt.Errorf("%s framework not registered", fw)
 	}
 	log.Debugf("Loaded Framework: " + tfFramework.FrameworkTyp())
 
@@ -91,7 +90,7 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	if tfmodelmap[modelKey] == nil {
 		tfmodelmap[modelKey], err = model.Load(modelName, tfFramework, flags)
 		if err != nil {
-			return false, err
+			return true, err
 		}
 
 		// We should check types of features and TF expectations here
@@ -107,22 +106,28 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	// Grab the input feature set and parse out the feature labels and values
 	inputSample := make(map[string]interface{})
 	for _, feat := range features {
+		// model.Inputs.Params
 		featMap := feat.(map[string]interface{})
+		// inputName := featMap["name"].(string)
+		// shape := tfmodelmap[modelKey].Metadata.Inputs.Features[inputName].Shape
+		// typ := tfmodelmap[modelKey].Metadata.Inputs.Features[inputName].Type
 		inputSample[featMap["name"].(string)] = featMap["data"]
 	}
 
-	log.Debug("Parsing of features completed")
+	log.Info("Parsing of features completed")
 
 	modelRunMutex.Lock()
 	tfmodelmap[modelKey].SetInputs(inputSample)
 	output, err := tfmodelmap[modelKey].Run(tfFramework)
 	modelRunMutex.Unlock()
 	if err != nil {
-		return false, err
+		log.Errorf("Error running the ml framework: %s", err)
+		return true, err
 	}
 
 	log.Debug("Model execution completed with result:")
-	log.Info(output)
+	log.Debug(output)
+
 
 	if strings.Contains(tfmodelmap[modelKey].Metadata.Method, "tensorflow/serving/classify") {
 		var out = make(map[string]interface{})
