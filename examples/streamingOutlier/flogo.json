@@ -1,0 +1,188 @@
+{
+  "name": "outlier_app",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "appModel": "1.0.0",
+  "imports": [
+    "mergefn github.com/abramvandergeest/flogo_merge_function",
+    "github.com/project-flogo/contrib/function/coerce",
+    "github.com/abramvandergeest/addDimension"
+  ],
+  "triggers": [
+    {
+      "id": "csv_trigger_zero",
+      "ref": "github.com/skothari-tibco/csvtimer",
+      "settings": null,
+      "handlers": [
+        {
+          "settings": {
+            "filePath": "zero.csv",
+            "header": true,
+            "repeatInterval": "500"
+          },
+          "actions": [
+            {
+              "id": "gather",
+              "input": {
+                "input": "=$.data"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "csv_trigger_one",
+      "ref": "github.com/skothari-tibco/csvtimer",
+      "settings": null,
+      "handlers": [
+        {
+          "settings": {
+            "filePath": "one.csv",
+            "header": true,
+            "repeatInterval": "500"
+          },
+          "actions": [
+            {
+              "id": "gather",
+              "input": {
+                "input": "=$.data"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "csv_trigger_two",
+      "ref": "github.com/skothari-tibco/csvtimer",
+      "settings": null,
+      "handlers": [
+        {
+          "settings": {
+            "filePath": "two.csv",
+            "header": true,
+            "repeatInterval": "500"
+          },
+          "actions": [
+            {
+              "id": "gather",
+              "input": {
+                "input": "=$.data"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "pipeline:gather",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "input",
+              "type": "any"
+            }
+          ],
+          "output": [
+            {
+              "name": "result",
+              "type": "int"
+            }
+          ]
+        },
+        "stages": [
+          {
+            "ref": "github.com/project-flogo/stream/activity/aggregate",
+            "settings": {
+              "function": "accumulate",
+              "windowType": "timeTumbling",
+              "windowSize": "510"
+            },
+            "input": {
+              "value": "=$.input"
+            },
+            "output": {
+              "result": "=mergefn.merge($.result,\"index\")"
+            }
+          },
+          {
+            "ref": "github.com/abramvandergeest/addDimension",
+            "input": {
+              "data": {"mapping":[
+                "=$.result.V1",
+                "=$.result.V2",
+                "=$.result.V3",
+                "=$.result.V4",
+                "=$.result.V5",
+                "=$.result.V6",
+                "=$.result.V7",
+                "=$.result.V8",
+                "=$.result.V9",
+                "=$.result.V10",
+                "=$.result.V11",
+                "=$.result.V12",
+                "=$.result.V13",
+                "=$.result.V14",
+                "=$.result.V15",
+                "=$.result.V16",
+                "=$.result.V17",
+                "=$.result.V18",
+                "=$.result.V19",
+                "=$.result.V20",
+                "=$.result.V21",
+                "=$.result.V22",
+                "=$.result.V23",
+                "=$.result.V24",
+                "=$.result.V25",
+                "=$.result.V26",
+                "=$.result.V27",
+                "=$.result.V28",
+                "=$.result.TimeSN",
+                "=$.result.AmountSN"
+              ]}
+            }
+          },
+          {
+            "id": "inference_ml",
+            "ref": "github.com/project-flogo/ml/activity/inference",
+            "input": {
+              "model": "Archive_20190315.zip",
+              "framework": "Tensorflow",
+              "features": {
+                "mapping":[
+                {
+                  "name": "inputs",
+                  "data": "=$.output"
+                  }
+                ]
+              },
+              "sigDefName": "serving_default",
+              "tag": "serve"
+            }
+          },
+          {
+            "ref": "github.com/project-flogo/contrib/activity/log",
+            "input": {
+              "message": "=$.result"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "ref": "github.com/project-flogo/stream",
+      "settings": {
+        "groupBy": "input.index",
+        "pipelineURI": "res://pipeline:gather"
+      },
+      "id": "gather"
+    }
+  ]
+}
