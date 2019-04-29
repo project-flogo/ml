@@ -1,7 +1,7 @@
 # ML App Layout
  While there are many possible ways to use machine learning (ML) within a Flogo app, there exists a fairly standard way to create an ML app within Flogo.  Here we are going to discuss the basic layout of such an app with a few typical variants based upon triggers / usecases.
 
-### General structure
+## General structure
 
 Like Flogo in general, ML based Flogo apps are based around the consept of an event.  I.e. an event occurs, which generates data.  This data is then processed into a usable form (possibly joined with external data) so that it can be fed into the ML algorithm to make a inference.  This inference is then post-processed to allow the app perform an action.    Therefore, a typical ML app follows the following steps:
 1. A Flogo trigger responds to an event.
@@ -14,6 +14,6 @@ Like Flogo in general, ML based Flogo apps are based around the consept of an ev
 
 It is also worth noting that an activity to log or export data to a database can occur at any step.
 
-### Examples
+## Examples
 
 Examples of this layout exist [here](https://github.com/project-flogo/ml/tree/master/examples).
