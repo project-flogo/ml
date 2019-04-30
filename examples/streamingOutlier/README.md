@@ -11,7 +11,7 @@ This app is an example on how to use flogo streams to handle streaming ML infere
 
 
 ### Jupyter Notebooks
-Two Jupyter notebooks exist in this repo.  The first (processing_cc_fraud_data.ipynb) processes the kaggle cc data and creates normalized training data and normalizedsample data to run the outlier app on that the model has not previously seen.  dnn_outlier.ipynb on the other hand trains the dnn model used in the app.
+Two Jupyter notebooks exist in this repo.  The first (processing_cc_fraud_data.ipynb) processes the kaggle cc data and creates normalized training data and normalized sample data to run the outlier app on that the model has not previously seen.  dnn_outlier.ipynb on the other hand trains the dnn model used in the app.
 
 After running teh DNN file, you must zip and move the model in the m directory into the directory that contains your binary file.
 
