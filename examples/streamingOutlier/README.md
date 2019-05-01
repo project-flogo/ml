@@ -33,6 +33,13 @@ Then the model and the data files (zero.csv, one.csv, and two.csv) from the jupy
 ```
 ./outlier
 ```
+#### Database
+
+This app requires that a PostGreSQL database exist on the same machine that the app runs on with a connection string as defined in the flogo.json file.  The database must have a table compatible with the outlierdatalogging custom (to this app) activity.  The table required is test.outlier and columns ind,act,pred,t. To match the Insert statement:
+```
+INSERT INTO test.outlier (ind, act, pred, t) VALUES ($1, $2, $3, $4)
+```
+This database can be used to drive an external dashboard run on Grafana (among other possibilities).
 
 #### Debugging
 Potentially, errors can arise based on old versions of modules.  Here are some commands to try in the outlier_app directory before building the app.
