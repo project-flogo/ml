@@ -1,0 +1,241 @@
+{
+  "name": "ImageClassification",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/contrib/activity/actreturn",
+    "github.com/project-flogo/contrib/activity/log",
+    "github.com/project-flogo/contrib/function/string",
+    "github.com/project-flogo/contrib/trigger/rest",
+    "github.com/project-flogo/flow",
+    "github.com/abramvandergeest/resizeimage",
+    "github.com/abramvandergeest/preprocessimage",
+    "github.com/project-flogo/ml/activity/inference",
+    "github.com/project-flogo/flow@master",
+    "github.com/project-flogo/contrib/function/string@master",
+    "github.com/project-flogo/contrib/trigger/rest@master",
+    "github.com/abramvandergeest/preprocessimage@master",
+    "github.com/project-flogo/ml/activity/inference@master"
+  ],
+  "triggers": [
+    {
+      "id": "receive_http_message",
+      "ref": "#rest",
+      "settings": {
+        "port": 8080
+      },
+      "handlers": [
+        {
+          "settings": {
+            "method": "POST",
+            "path": "/image"
+          },
+          "actions": [
+            {
+              "ref": "#flow",
+              "settings": {
+                "flowURI": "res://flow:get_image"
+              },
+              "input": {
+                "content": "=$.content",
+                "contentType": "=$.headers.Content-Type"
+              },
+              "output": {
+                "code": "=$.Code",
+                "data": "=$.Response"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "flow:get_image",
+      "data": {
+        "name": "GetImage",
+        "metadata": {
+          "input": [
+            {
+              "name": "content",
+              "type": "any"
+            },
+            {
+              "name": "contentType",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "Response",
+              "type": "any"
+            },
+            {
+              "name": "Code",
+              "type": "integer"
+            }
+          ]
+        },
+        "tasks": [
+          {
+            "id": "log_4",
+            "name": "Log (2)",
+            "description": "Logs a message",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "addDetails": false,
+                "message": "=string.concat(\"File Key: \", $flow.content.files[0].key, \" and content type \", $flow.contentType)"
+              }
+            }
+          },
+          {
+            "id": "log_5",
+            "name": "Log (3)",
+            "description": "Logs a message",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "message": "File(s) attached.",
+                "addDetails": false
+              }
+            }
+          },
+          {
+            "id": "resize",
+            "name": "Resize Image",
+            "activity": {
+              "ref": "#resizeimage",
+              "settings": {
+                "resamplingFilter": "Lanczos"
+              },
+              "input": {
+                "file": "=$flow.content.files[0].file",
+                "maxDimSize": 256
+              }
+            }
+          },
+          {
+            "id": "preprocess_image",
+            "name": "Preprocess Image",
+            "activity": {
+              "ref": "#preprocessimage",
+              "input": {
+                "image": "=$activity[resize].resizedImage"
+              }
+            }
+          },
+          {
+            "id": "inference_ml",
+            "name": "Inference ML Model",
+            "activity": {
+              "ref": "#inference",
+              "input": {
+                "model": "Archive_rcnn_inception_v2_coco.zip",
+                "framework": "Tensorflow",
+                "sigDefName": "serving_default",
+                "tag": "serve",
+                "features": {
+                  "mapping": [
+                    {
+                      "name": "inputs",
+                      "data": "=$activity[preprocess_image].output"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": "actreturn_10",
+            "name": "Return",
+            "description": "Return Activity",
+            "activity": {
+              "ref": "#actreturn",
+              "settings": {
+                "mappings": {
+                  "Code": 200,
+                  "Response": {
+                    "mapping": {
+                      "Class": "=$activity[inference_ml].result.detection_classes[0][0]",
+                      "Score": "=$activity[inference_ml].result.detection_scores[0][0]"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "id": "actreturn_7",
+            "name": "Return",
+            "description": "Return Activity",
+            "activity": {
+              "ref": "#actreturn",
+              "settings": {
+                "mappings": {
+                  "Code": 400,
+                  "Response": "Not the correct image format"
+                }
+              }
+            }
+          },
+          {
+            "id": "actreturn_8",
+            "name": "Return (2)",
+            "description": "Return Activity",
+            "activity": {
+              "ref": "#actreturn",
+              "settings": {
+                "mappings": {
+                  "Code": 400,
+                  "Response": "Invalid message type."
+                }
+              }
+            }
+          }
+        ],
+        "links": [
+          {
+            "from": "log_4",
+            "to": "log_5",
+            "type": "expression",
+            "value": "string.contains($flow.contentType, \"multipart/form-data\") == true"
+          },
+          {
+            "from": "log_5",
+            "to": "resize",
+            "type": "expression",
+            "value": "string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/jpeg\") || string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/png\")"
+          },
+          {
+            "from": "log_5",
+            "to": "actreturn_7",
+            "type": "expression",
+            "value": "string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/jpeg\") == false \u0026\u0026 string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/png\") == false"
+          },
+          {
+            "from": "log_4",
+            "to": "actreturn_8",
+            "type": "expression",
+            "value": "string.contains($flow.contentType, \"multipart/form-data\") == false"
+          },
+          {
+            "from": "resize",
+            "to": "preprocess_image"
+          },
+          {
+            "from": "preprocess_image",
+            "to": "inference_ml"
+          },
+          {
+            "from": "inference_ml",
+            "to": "actreturn_10"
+          }
+        ]
+      }
+    }
+  ]
+}
