@@ -28,6 +28,8 @@ flogo update github.com/project-flogo/core
 flogo install github.com/project-flogo/stream@master
 flogo install github.com/project-flogo/stream/activity/aggregate@master
 flogo install github.com/project-flogo/ml/activity/inference@master
+flogo install github.com/skothari-tibco/csvtimer@master
+flogo build
 cd bin
 ```
 Then the model and the data files (zero.csv, one.csv, and two.csv) from the jupyter notebooks needs to be placed in the bin directory adjacent to the binary file.  Then the app can be run from the outlier_app/bin directory:
@@ -46,8 +48,10 @@ This database can be used to drive an external dashboard run on Grafana (among o
 Potentially, errors can arise based on old versions of modules.  Here are some commands to try in the outlier_app directory before building the app.
 ```
 flogo update github.com/project-flogo/core
-flogo install github.com/project-flogo/stream
-flogo update github.com/skothari-tibco/csvtimer
+flogo install github.com/project-flogo/stream@master
+flogo install github.com/project-flogo/stream/activity/aggregate@master
+flogo install github.com/project-flogo/ml/activity/inference@master
+flogo install github.com/skothari-tibco/csvtimer@master
 ```
 
 Also, you could try updating the cli.  Outside the app directory run:
