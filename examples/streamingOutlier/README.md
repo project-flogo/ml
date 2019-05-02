@@ -25,7 +25,7 @@ The DNN model included above is a basic classifier with a heavily unbalanced dat
 flogo create -f flogo.json outlier_app
 cd outlier_app/
 flogo update github.com/project-flogo/core
-flogo install github.com/project-flogo/stream
+flogo install github.com/project-flogo/stream@master
 flogo install github.com/project-flogo/stream/activity/aggregate@master
 cd bin
 ```
