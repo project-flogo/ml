@@ -27,6 +27,7 @@ cd outlier_app/
 flogo update github.com/project-flogo/core
 flogo install github.com/project-flogo/stream@master
 flogo install github.com/project-flogo/stream/activity/aggregate@master
+flogo install github.com/project-flogo/ml/activity/inference@master
 cd bin
 ```
 Then the model and the data files (zero.csv, one.csv, and two.csv) from the jupyter notebooks needs to be placed in the bin directory adjacent to the binary file.  Then the app can be run from the outlier_app/bin directory:
