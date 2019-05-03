@@ -12,12 +12,7 @@
     "github.com/project-flogo/flow",
     "github.com/abramvandergeest/resizeimage",
     "github.com/abramvandergeest/preprocessimage",
-    "github.com/project-flogo/ml/activity/inference",
-    "github.com/project-flogo/flow@master",
-    "github.com/project-flogo/contrib/function/string@master",
-    "github.com/project-flogo/contrib/trigger/rest@master",
-    "github.com/abramvandergeest/preprocessimage@master",
-    "github.com/project-flogo/ml/activity/inference@master"
+    "github.com/project-flogo/ml/activity/inference"
   ],
   "triggers": [
     {
@@ -32,22 +27,20 @@
             "method": "POST",
             "path": "/image"
           },
-          "actions": [
-            {
-              "ref": "#flow",
-              "settings": {
-                "flowURI": "res://flow:get_image"
-              },
-              "input": {
-                "content": "=$.content",
-                "contentType": "=$.headers.Content-Type"
-              },
-              "output": {
-                "code": "=$.Code",
-                "data": "=$.Response"
-              }
+          "action": {
+            "ref": "#flow",
+            "settings": {
+              "flowURI": "res://flow:get_image"
+            },
+            "input": {
+              "content": "=$.content",
+              "contentType": "=$.headers.Content-Type"
+            },
+            "output": {
+              "code": "=$.Code",
+              "data": "=$.Response"
             }
-          ]
+          }
         }
       ]
     }
@@ -214,7 +207,7 @@
             "from": "log_5",
             "to": "actreturn_7",
             "type": "expression",
-            "value": "string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/jpeg\") == false \u0026\u0026 string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/png\") == false"
+            "value": "string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/jpeg\") == false && string.equalsIgnoreCase($flow.content.files[0].fileType, \"image/png\") == false"
           },
           {
             "from": "log_4",
