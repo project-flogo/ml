@@ -1,0 +1,164 @@
+{
+  "name": "flow_outlier_app",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "a flow for analyzing outlier data",
+  "appModel": "1.0.0",
+  "imports": [
+    "github.com/project-flogo/ml/activity/inference@master",
+    "github.com/skothari-tibco/csvtimer@master",
+    "github.com/project-flogo/flow",
+    "github.com/abramvandergeest/outlierdatalogging",
+    "github.com/project-flogo/contrib/activity/actreturn",
+    "github.com/abramvandergeest/addDimension",
+    "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+    "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+    "ct github.com/abramvandergeest/currentTimeFn",
+    "github.com/project-flogo/contrib/activity/log"
+  ],
+  "triggers": [
+    {
+      "id": "csv_trigger",
+      "ref": "#csvtimer",
+      "settings": null,
+      "handlers": [
+        {
+          "settings": {
+            "filePath": "/Users/avanderg@tibco.com/working/go_working/ml/examples/flowsOutlier/flow_outlier_app/bin/cc_outlier.csv",
+            "header": true,
+            "repeatInterval": "500"
+          },
+          "actions": [
+            {
+              "ref": "#flow",
+              "settings": {
+                "flowURI": "res://flow:process_outlier"
+              },
+              "input": {
+                "input": "=$.data"
+              },
+              "output": {
+                "code": "=$.Code",
+                "data": "=$.Response"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "flow:process_outlier",
+      "data": {
+        "name": "ProcessOutlier",
+        "metadata": {
+          "input": [
+            {
+              "name": "input",
+              "type": "any"
+            }
+          ],
+          "output": [
+            {
+              "name": "Response",
+              "type": "any",
+              "value": "200"
+            },
+            {
+              "name": "Code",
+              "type": "integer",
+              "value": "200"
+            }
+          ]
+        },
+        "tasks": [
+          {
+            "id": "addDim",
+            "name": "Adding a dimension",
+            "activity": {
+              "ref": "github.com/abramvandergeest/addDimension",
+              "input": {
+                "data": {
+                  "mapping": [
+                    "=$flow.input.V1",
+                    "=$flow.input.V2",
+                    "=$flow.input.V3",
+                    "=$flow.input.V4",
+                    "=$flow.input.V5",
+                    "=$flow.input.V6",
+                    "=$flow.input.V7",
+                    "=$flow.input.V8",
+                    "=$flow.input.V9",
+                    "=$flow.input.V10",
+                    "=$flow.input.V11",
+                    "=$flow.input.V12",
+                    "=$flow.input.V13",
+                    "=$flow.input.V14",
+                    "=$flow.input.V15",
+                    "=$flow.input.V16",
+                    "=$flow.input.V17",
+                    "=$flow.input.V18",
+                    "=$flow.input.V19",
+                    "=$flow.input.V20",
+                    "=$flow.input.V21",
+                    "=$flow.input.V22",
+                    "=$flow.input.V23",
+                    "=$flow.input.V24",
+                    "=$flow.input.V25",
+                    "=$flow.input.V26",
+                    "=$flow.input.V27",
+                    "=$flow.input.V28",
+                    "=$flow.input.TimeSN",
+                    "=$flow.input.AmountSN"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": "inference_ml",
+            "name": "Making Inference",
+            "description": "Making Inference",
+            "activity": {
+              "ref": "github.com/project-flogo/ml/activity/inference",
+              "input": {
+                "model": "Archive_20190315.zip",
+                "framework": "Tensorflow",
+                "features": {
+                  "mapping": [
+                    {
+                      "name": "inputs",
+                      "data": "=$activity[addDim].output"
+                    }
+                  ]
+                },
+                "sigDefName": "serving_default",
+                "tag": "serve"
+              }
+            }
+          },
+          {
+            "id": "log0",
+            "activity": {
+              "ref": "github.com/project-flogo/contrib/activity/log",
+              "input": {
+                "message": "=$activity[inference_ml].result.Yout"
+              }
+            }
+          }
+        ],
+        "links": [
+          {
+            "from": "addDim",
+            "to": "inference_ml"
+          },
+          {
+            "from": "inference_ml",
+            "to": "log0"
+          }
+        ]
+      }
+    }
+  ]
+}
