@@ -24,7 +24,7 @@
       "handlers": [
         {
           "settings": {
-            "filePath": "/Users/avanderg@tibco.com/working/go_working/ml/examples/flowsOutlier/flow_outlier_app/bin/cc_outlier.csv",
+            "filePath": "cc_outlier.csv",
             "header": true,
             "repeatInterval": "500"
           },
