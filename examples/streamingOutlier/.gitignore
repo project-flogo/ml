@@ -1,0 +1,6 @@
+*csv
+.ipynb_checkpoints
+*zip
+flogo.json.orig
+tmpdir
+outlier_app
