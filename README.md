@@ -92,7 +92,11 @@ map[scores:[[0.049997408 0.010411096 0.93959147]] classes:[[Jogging Sitting Upst
 
 ## Examples
 
-Currently no examples have been ported to this version (0.9.0) of flogo.
+Here are several examples of Flogo apps with ML included.
+
+1. [cnnUnitTest](examples/cnnUnitTest) -  building basic ML model into a go program using the flogo library API
+2. [cocoImageRecog](examples/cocoImageRecog) - build an app that creates a REST API that does image recognition
+3. [streamingOutlier](examples/streamingOutlier) - simulates data streaming from multiple sources being joined and fed into a DNN outlier detector.
 
 
 

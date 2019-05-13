@@ -1,0 +1,133 @@
+{
+  "name": "bcwx_demo",
+  "type": "flogo:app",
+  "version": "0.0.1",
+  "description": "",
+  "appModel": "1.1.0",
+  "imports": [
+    "github.com/project-flogo/contrib/activity/log",
+    "github.com/abramvandergeest/addDimension@master",
+    "github.com/project-flogo/contrib/function/coerce@master",
+    "github.com/project-flogo/stream/activity/aggregate@master",
+    "github.com/skothari-tibco/csvtimer@master",
+    "github.com/project-flogo/legacybridge",
+    "github.com/project-flogo/ml/activity/inference@master",
+    "github.com/project-flogo/contrib/trigger/channel@master",
+    "github.com/project-flogo/stream@master"
+  ],
+  "triggers": [
+    {
+      "id": "csv_trigger_zero",
+      "ref": "github.com/skothari-tibco/csvtimer",
+      "settings": null,
+      "handlers": [
+        {
+          "settings": {
+            "filePath": "bike_data.csv",
+            "header": true,
+            "repeatInterval": "100"
+          },
+          "actions": [
+            {
+              "id": "gather",
+              "if": "$.data.path == \"rideService/speed\" || $.data.path == \"rideService/userPower\" || $.data.path == \"tourService/ridingDuration\" || $.data.path == \"tourService/ridingDistance\" || $.data.path == \"tourService/ascent\" || $.data.path == \"tourService/calories\" || $.data.path == \"rideService/heartRate\" || $.data.path == \"rideService/cadence\" || $.data.path == \"tourService/averageSpeed\"",
+              "input": {
+                "input": "=$.data"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "pipeline:gather",
+      "data": {
+        "metadata": {
+          "input": [
+            {
+              "name": "input",
+              "type": "any"
+            }
+          ],
+          "output": [
+            {
+              "name": "out",
+              "type": "any"
+            }
+          ]
+        },
+        "stages": [
+          {
+            "ref": "#aggregate",
+            "settings": {
+              "function": "avg",
+              "windowType": "timeTumbling",
+              "windowSize": "1000",
+              "additionalSettings": "nameKey=path,valueKey=payload"
+            },
+            "input": {
+              "value": "=$.input"
+            },
+            "output": {
+              "result": {
+                "mapping": [
+                  "=coerce.toFloat32(getValue($.result[\"rideService/speed\"], 0) / 10)",
+                  "=coerce.toFloat32(getValue($.result[\"rideService/userPower\"], 0) / 100)",
+                  "=coerce.toFloat32(getValue($.result[\"tourService/ridingDuration\"], 0) / 500)",
+                  "=coerce.toFloat32(getValue($.result[\"tourService/ridingDistance\"], 0) / 2000)",
+                  "=coerce.toFloat32(getValue($.result[\"tourService/ascent\"], 0) / 15)",
+                  "=coerce.toFloat32(getValue($.result[\"tourService/calories\"], 0) / 50)",
+                  "=coerce.toFloat32(getValue($.result[\"rideService/heartRate\"], 0) / 150)",
+                  "=coerce.toFloat32(getValue($.result[\"rideService/cadence\"], 0) / 90)",
+                  "=coerce.toFloat32(getValue($.result[\"tourService/averageSpeed\"], 0) / 8)"
+                ]
+              }
+            }
+          },
+          {
+            "id": "addDim",
+            "ref": "#addDimension",
+            "input": {
+              "data": "=$.result"
+            }
+          },
+          {
+            "id": "inference_ml",
+            "ref": "#inference",
+            "input": {
+              "model": "Archive_COBI_bike_thresh_0.2.zip",
+              "framework": "Tensorflow",
+              "features": {
+                "mapping": [
+                  {
+                    "name": "inputs",
+                    "data": "=$.output"
+                  }
+                ]
+              },
+              "sigDefName": "serving_default",
+              "tag": "serve"
+            }
+          },
+          {
+            "ref": "#log",
+            "input": {
+              "message": "=$.result"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "ref": "#stream",
+      "settings": {
+        "pipelineURI": "res://pipeline:gather"
+      },
+      "id": "gather"
+    }
+  ]
+}
