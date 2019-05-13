@@ -139,6 +139,10 @@ func getTensorValue(tensor *tf.Tensor) interface{} {
 		return tensor.Value().([][]string)
 	case []string:
 		return tensor.Value().([]string)
+	case string:
+		return tensor.Value().(string)
+	case float32:
+		return tensor.Value().(float32)
 	case []float32:
 		return tensor.Value().([]float32)
 	case [][]float32:
@@ -151,10 +155,14 @@ func getTensorValue(tensor *tf.Tensor) interface{} {
 		return tensor.Value().([]int64)
 	case [][]int64:
 		return tensor.Value().([][]int64)
+	case int32:
+		return tensor.Value().(int32)
 	case []int32:
 		return tensor.Value().([]int32)
 	case [][]int32:
 		return tensor.Value().([][]int32)
+	case byte:
+		return tensor.Value().(byte)
 	case []byte:
 		return tensor.Value().([]byte)
 	case [][]byte:
