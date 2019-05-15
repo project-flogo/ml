@@ -3,7 +3,6 @@ package tf
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/project-flogo/core/support/log"
@@ -50,10 +49,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 			inputs[inputMap.Output(0)] = examplePb
 
 		case reflect.Slice, reflect.Array:
-			shape := model.Metadata.Inputs.Features[inputName].Shape
-			typ := model.Metadata.Inputs.Features[inputName].Type
-
-			inputs[inputMap.Output(0)], err = coerce2RankTypeTensorFlow(model.Inputs[inputName], shape, typ)
+			inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
 			if err != nil {
 				return nil, err
 			}
@@ -100,37 +96,6 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 
 	return out, nil
 
-}
-
-func checkDataTypes(data interface{}, shape []int64, typ string, inputName string) (outdata interface{}, err error) {
-	t := fmt.Sprintf("%T", data)
-	outdata = data
-	switch typ {
-	case "DT_FLOAT":
-		// if strings.Contains(t, "float64") {
-		// 	outdata, err = float64TensorTofloat32Tensor(data, nil)  //location of coerce functions to be deteremined
-		// 	if err != nil {
-		// 		return nil, fmt.Errorf("Data conversion for %s had error: %s", inputName, err)
-		// 	}
-		// 	fmt.Println("Coerceing FLoat to Double")
-		// } else
-		if !strings.Contains(t, "float32") {
-			return nil, fmt.Errorf("Data for %s not of the right type. should be tensor of %s (TF type) but is array of %s (go type)", inputName, typ, t)
-		}
-	case "DT_DOUBLE":
-		if !strings.Contains(t, "float64") {
-			return nil, fmt.Errorf("Data for %s not of the right type. should be tensor of %s (TF type) but is array of %s (go type)", inputName, typ, t)
-		}
-	case "DT_INT32":
-		if !strings.Contains(t, "int32") {
-			return nil, fmt.Errorf("Data for %s not of the right type. should be tensor of %s (TF type) but is array of %s (go type)", inputName, typ, t)
-		}
-	case "DT_INT64":
-		if !strings.Contains(t, "int64") {
-			return nil, fmt.Errorf("Data for %s not of the right type. should be tensor of %s (TF type) but is array of %s (go type)", inputName, typ, t)
-		}
-	}
-	return outdata, nil
 }
 
 func getTensorValue(tensor *tf.Tensor) interface{} {
