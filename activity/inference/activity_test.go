@@ -9,6 +9,7 @@ import (
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support/test"
 	"github.com/project-flogo/ml/activity/inference/framework/tf"
+	tfactual "github.com/tensorflow/tensorflow/tensorflow/go"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -184,6 +185,52 @@ func TestCNNModel(t *testing.T) {
 			{{{9.22008867}}, {{5.85040827}}, {{2.48839579}}, {{00.709471493}}, {{0.135591557}}, {{0.00149167657}}, {{0.0000858655563}}, {{0.00000331318370}}, {{0.0000000856947568}}, {{0.}}},
 			{{{0.0173705094}}, {{0.135591557}}, {{0.709471493}}, {{2.48839579}}, {{5.85040827}}, {{9.22008867}}, {{5.85040827}}, {{2.48839579}}, {{0.709471493}}, {{0.135591557}}},
 		},
+	})
+
+	tc.SetInput("inputName", "inputs")
+	tc.SetInput("framework", "Tensorflow")
+	tc.SetInput("sigDefName", "serving_default")
+	tc.SetInput("tag", "serve")
+	tc.SetInput("features", features3)
+
+	done, err = act.Eval(tc)
+	if done == false {
+		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
+	} else {
+		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
+	}
+
+	//check result attr
+	fmt.Println(tc.GetOutput("result"))
+}
+
+func TestByteModel(t *testing.T) {
+
+	var done bool
+	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
+
+	// Unit test ofSimple CNN model
+	fmt.Println("Unit test of passing byte to model")
+	tc.SetInput("model", "testModels/Archive_byte_test_model.zip")
+
+	d:=[]int32{1,2,3,4,5,10}
+	data,err:=tfactual.NewTensor(d)
+	if err!=nil{
+		fmt.Println("problem loading TF Tensor")
+	}
+
+	fmt.Println(data)
+
+	var features3 []interface{}
+	features3 = append(features3, map[string]interface{}{
+		"name": "inputs",
+		"data": data,
 	})
 
 	tc.SetInput("inputName", "inputs")

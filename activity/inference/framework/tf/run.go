@@ -41,6 +41,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		v := reflect.ValueOf(model.Inputs[inputName])
 		switch v.Kind() {
 		case reflect.Map:
+			log.RootLogger().Debug("Data is determined to be a map and is being converted to tf.tensor")
 			// Need to check names against pb structure, right now just assume it
 			examplePb, err := createInputExampleTensor(model.Inputs[inputName])
 			if err != nil {
@@ -49,12 +50,14 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 			inputs[inputMap.Output(0)] = examplePb
 
 		case reflect.Slice, reflect.Array:
+			log.RootLogger().Debug("Data is determined to be a slice/array and is being converted to tf.tensor")
 			inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
 			if err != nil {
 				return nil, err
 			}
 
 		case reflect.Ptr:
+			log.RootLogger().Debug("Data is determined to be a pointer and is being converted to tf.tensor")
 			if val, ok := model.Inputs[inputName].(*tf.Tensor); ok {
 				inputs[inputMap.Output(0)] = val
 			} else {
@@ -72,6 +75,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		default:
 
 			log.RootLogger().Info("Type not a Slice, Array, Map, or Pointer/Tensor, but still trying to make a tf.Tensor.")
+			fmt.Println(model.Inputs[inputName])
 			inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
 			if err != nil {
 				return nil, err
