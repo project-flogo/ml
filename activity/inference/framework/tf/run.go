@@ -75,7 +75,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		default:
 
 			log.RootLogger().Info("Type not a Slice, Array, Map, or Pointer/Tensor, but still trying to make a tf.Tensor.")
-			fmt.Println(model.Inputs[inputName])
+			log.RootLogger().Debug("model.Inputs[inputName] = ",model.Inputs[inputName])
 			inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
 			if err != nil {
 				return nil, err
