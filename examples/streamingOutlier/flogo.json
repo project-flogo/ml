@@ -112,7 +112,7 @@
             },
             "output": {
               "result": "=mergefn.merge($.result,\"index\")",
-              "passthru.currTime": "=ct.currentTimeUnix(5)",
+              "passthru.currTime": "=ct.currentTimeUnix()",
               "passthru.mergeddata": "=mergefn.merge($.result,\"index\")"
             }
           },

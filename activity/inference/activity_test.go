@@ -15,20 +15,6 @@ import (
 
 var _ tf.TensorflowModel
 
-/*
-func getActivityMetadata() *activity.Metadata {
-
-	if activityMetadata == nil {
-		jsonMetadataBytes, err := ioutil.ReadFile("activity.json")
-		if err != nil {
-			panic("No Json Metadata found for activity.json path")
-		}
-
-		activityMetadata = activity.NewMetadata(string(jsonMetadataBytes))
-	}
-
-	return activityMetadata
-}*/
 func TestRegister(t *testing.T) {
 
 	ref := activity.GetRef(&Activity{})
@@ -71,11 +57,13 @@ func TestDNNEstimator(t *testing.T) {
 	fmt.Println("blah")
 
 	done, err = act.Eval(tc)
-	if done == false {
+	out:=tc.GetOutput("result")
+	if out.(map[string]interface{})["outputs"]==nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
 	}
+	fmt.Println(tc.GetOutput("result"))
 }
 
 func TestEstimatorLinearRegressor(t *testing.T) {
@@ -117,7 +105,7 @@ func TestEstimatorLinearRegressor(t *testing.T) {
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
 	}
-
+	fmt.Println(tc.GetOutput("result"))
 }
 
 func TestPairwaiseMul(t *testing.T) {
@@ -155,11 +143,13 @@ func TestPairwaiseMul(t *testing.T) {
 	tc.SetInput("features", features2)
 
 	done, err = act.Eval(tc)
-	if done == false {
+	out:=tc.GetOutput("result")
+	if out.(map[string]interface{})["pred"]==nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
 	}
+	fmt.Println(tc.GetOutput("result"))
 }
 
 func TestCNNModel(t *testing.T) {
@@ -194,7 +184,8 @@ func TestCNNModel(t *testing.T) {
 	tc.SetInput("features", features3)
 
 	done, err = act.Eval(tc)
-	if done == false {
+	out:=tc.GetOutput("result")
+	if out.(map[string]interface{})["pred"]==nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -225,8 +216,6 @@ func TestByteModel(t *testing.T) {
 		fmt.Println("problem loading TF Tensor")
 	}
 
-	fmt.Println(data)
-
 	var features3 []interface{}
 	features3 = append(features3, map[string]interface{}{
 		"name": "inputs",
@@ -240,7 +229,8 @@ func TestByteModel(t *testing.T) {
 	tc.SetInput("features", features3)
 
 	done, err = act.Eval(tc)
-	if done == false {
+	out:=tc.GetOutput("result")
+	if out.(map[string]interface{})["out"]==nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -284,11 +274,13 @@ func TestEstimatorClassifier(t *testing.T) {
 	tc.SetInput("features", featuresA)
 
 	done, err = act.Eval(tc)
-	if done == false {
+	out:=tc.GetOutput("result")
+	if out.(map[string]interface{})["0"]==nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
 	}
+	fmt.Println(tc.GetOutput("result"))
 }
 
 func TestCreate(t *testing.T) {
@@ -301,5 +293,97 @@ func TestCreate(t *testing.T) {
 		t.Error("Activity Not Created")
 		t.Fail()
 		return
+	}
+}
+
+func TestCNNModel2(t *testing.T) {
+
+	var done bool
+	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
+
+	// Unit test ofSimple CNN model
+	fmt.Println("Unit test of simple CNN model")
+	tc.SetInput("model", "testModels/Archive_simpleCNN.zip")
+
+	var features3 []interface{}
+	features3 = append(features3, map[string]interface{}{
+		"name": "X",
+		"data": [][][][]float32{
+			{{{0.0000000856947568}}, {{0.00000331318370}}, {{0.0000858655563}}, {{0.00149167657}}, {{0.0173705094}}, {{0.135591557}}, {{0.709471493}}, {{2.48839579}}, {{5.85040827}}, {{9.22008867}}},
+			{{{9.22008867}}, {{5.85040827}}, {{2.48839579}}, {{00.709471493}}, {{0.135591557}}, {{0.00149167657}}, {{0.0000858655563}}, {{0.00000331318370}}, {{0.0000000856947568}}, {{0.}}},
+			{{{0.0173705094}}, {{0.135591557}}, {{0.709471493}}, {{2.48839579}}, {{5.85040827}}, {{9.22008867}}, {{5.85040827}}, {{2.48839579}}, {{0.709471493}}, {{0.135591557}}},
+		},
+	})
+
+	tc.SetInput("inputName", "inputs")
+	tc.SetInput("framework", "Tensorflow")
+	tc.SetInput("sigDefName", "serving_default")
+	tc.SetInput("tag", "serve")
+	tc.SetInput("features", features3)
+
+	done, err = act.Eval(tc)
+	out:=tc.GetOutput("result")
+	if out.(map[string]interface{})["pred"]==nil {
+		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
+	} else {
+		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
+	}
+
+	//check result attr
+	fmt.Println(tc.GetOutput("result"))
+}
+
+
+func TestEstimatorClassifierTESTING(t *testing.T) {
+
+	var done bool
+	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
+
+	// Unit test of Estimator Classifier model
+	fmt.Println("Unit test of Estimator Classifier model")
+	tc.SetInput("model", "testModels/Archive_estDNNClf.zip")
+	tc.SetInput("inputName", "inputs")
+	var estInputsA = make(map[string]interface{})
+	estInputsA["one"] = 0.140586
+	estInputsA["two"] = 0.140586
+	estInputsA["three"] = 0.140586
+	estInputsA["label"] = 0
+
+	var featuresA []interface{}
+	featuresA = append(featuresA, map[string]interface{}{
+		"name": "inputs", //"one",
+		"data": estInputsA, // 0.140586,
+	})
+
+	tc.SetInput("inputName", "inputs")
+	tc.SetInput("framework", "Tensorflow")
+	tc.SetInput("sigDefName", "serving_default")
+	tc.SetInput("tag", "serve")
+	tc.SetInput("features", featuresA)
+
+	testval:= make(map[string]interface{})
+	testval["0"]=0.32395765
+	testval["1"]=0.3435985
+	testval["2"]=0.33244383
+
+	done, err = act.Eval(tc)
+	out:=tc.GetOutput("result")
+	fmt.Println(out)
+	if out.(map[string]interface{})["0"]==nil {
+		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
+	} else {
+		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
 	}
 }

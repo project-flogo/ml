@@ -93,9 +93,6 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 			return true, err
 		}
 
-		// We should check types of features and TF expectations here
-		// We should also check shapes
-
 	} else {
 		log.Debug("Model already loaded - skipping loading")
 	}
@@ -106,12 +103,18 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 	// Grab the input feature set and parse out the feature labels and values
 	inputSample := make(map[string]interface{})
 	for _, feat := range features {
-		// model.Inputs.Params
 		featMap := feat.(map[string]interface{})
-		// inputName := featMap["name"].(string)
-		// shape := tfmodelmap[modelKey].Metadata.Inputs.Features[inputName].Shape
-		// typ := tfmodelmap[modelKey].Metadata.Inputs.Features[inputName].Type
-		inputSample[featMap["name"].(string)] = featMap["data"]
+		inputName := featMap["name"].(string)
+		inmodel := false
+		for key := range tfmodelmap[modelKey].Metadata.Inputs.Features{
+			if key==inputName{
+				inputSample[inputName] = featMap["data"]
+				inmodel=true
+			}
+		}
+		if !inmodel{
+			return false,fmt.Errorf("%s not an input into model",featMap["name"].(string))
+		}
 	}
 
 	log.Info("Parsing of features completed")

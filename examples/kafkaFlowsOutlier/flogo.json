@@ -5,31 +5,31 @@
   "description": "a flow for analyzing outlier data",
   "appModel": "1.0.0",
   "imports": [
-    "github.com/project-flogo/ml/activity/inference@master",
-    "github.com/skothari-tibco/csvtimer@master",
-    "github.com/project-flogo/flow",
-    "github.com/abramvandergeest/outlierdatalogging",
-    "github.com/project-flogo/contrib/activity/actreturn",
     "github.com/abramvandergeest/addDimension",
-    "github.com/TIBCOSoftware/flogo-contrib/activity/log",
     "github.com/TIBCOSoftware/flogo-contrib/activity/rest",
+    "github.com/TIBCOSoftware/flogo-contrib/activity/log",
+    "github.com/project-flogo/contrib/activity/actreturn",
+    "github.com/project-flogo/contrib/trigger/kafka",
+    "github.com/project-flogo/flow@master",
+    "github.com/abramvandergeest/outlierdatalogging@master",
     "ct github.com/abramvandergeest/currentTimeFn",
     "github.com/project-flogo/contrib/activity/log",
-    "github.com/project-flogo/contrib/trigger/kafka"
+    "github.com/project-flogo/ml/activity/inference@master",
+    "github.com/skothari-tibco/csvtimer@master"
   ],
   "triggers": [
     {
       "id": "kafka_trigger",
       "ref": "#kafka",
       "settings": {
-        "brokerUrls":"localhost:9092",
-        "trustStore" : ""
+        "brokerUrls": "localhost:9092",
+        "trustStore": ""
       },
       "handlers": [
         {
           "settings": {
-            "topic": "connect-test",
-            "offset":0
+            "offset": 0,
+            "topic": "connect-test"
           },
           "actions": [
             {
@@ -142,6 +142,22 @@
             }
           },
           {
+            "id": "outlierlog",
+            "activity": {
+              "ref": "github.com/abramvandergeest/outlierdatalogging",
+              "settings": {
+                "driverName": "postgres",
+                "psqlInfo": "host=localhost port=5432 user=flogo password=flynnRocks dbname=avanderg@tibco.com sslmode=disable"
+              },
+              "input": {
+                "ind": "=$flow.input.index",
+                "act": "=$flow.input.Class",
+                "pred": "=$activity[inference_ml].result.Yout",
+                "t": "=ct.currentTimeUnix()"
+              }
+            }
+          },
+          {
             "id": "log0",
             "activity": {
               "ref": "github.com/project-flogo/contrib/activity/log",
@@ -159,6 +175,10 @@
           {
             "from": "inference_ml",
             "to": "log0"
+          },
+          {
+            "from": "inference_ml",
+            "to": "outlierlog"
           }
         ]
       }

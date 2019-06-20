@@ -48,7 +48,7 @@ $ go generate
 $ go run main.go
 ```
 
-Using your favorite method (I used Postman) to send the following data to localhost:8080/gaussian as the body of a POST request:
+Using your favorite method (I used Postman) to send the following data to localhost:8080/gaussian as the body of a POST request where the content type is set to JSON (in Postman this is under Headers):
 
 ```
 {

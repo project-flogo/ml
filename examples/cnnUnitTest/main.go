@@ -79,13 +79,13 @@ func RunActivities(ctx context.Context, inputs map[string]interface{}) (map[stri
 	//    while the inference activity is taking them in as []interfaces{} at each layer
 	d := inp["Input"].([]interface{})
 	fmt.Println(d)
-	var datafeat []interface{} 
+	var datafeat [][][][]float32 
 	for _, row := range d {      // looping over each gaussian sent
 		row2 := row.([]interface{})
-		var gaus []interface{} 
+		var gaus [][][]float32 
 		for _, item := range row2 { // looping over each item in the gaussian
-			var it []interface{}  //Adding one more dimension
-			var barebracket []interface{} // and again
+			var it [][]float32  //Adding one more dimension
+			var barebracket []float32 // and again
 			barebracket=append(barebracket,float32(item.(float64)))
 			it=append(it,barebracket)
 			gaus = append(gaus, it)
