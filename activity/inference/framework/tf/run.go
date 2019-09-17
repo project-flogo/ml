@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/project-flogo/core/data/coerce"
 	"github.com/project-flogo/core/support/log"
 	models "github.com/project-flogo/ml/activity/inference/model"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
@@ -18,6 +19,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 	savedModel := model.Instance.(*tf.SavedModel)
 
 	var inputOps = make(map[string]*tf.Operation)
+	// var inputOpsType = make(map[string]string)
 	var outputOps []tf.Output
 
 	// Validate that the operations exsist and create operation
@@ -25,6 +27,8 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		if validateOperation(v.Name, savedModel) == false {
 			return nil, fmt.Errorf("Invalid operation %s", v.Name)
 		}
+		fmt.Println(k, v.Name, v.Type, v.Shape)
+		// inputOpsType[v.Name] = v.Type
 		inputOps[k] = savedModel.Graph.Operation(v.Name)
 	}
 
@@ -51,9 +55,41 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 
 		case reflect.Slice, reflect.Array:
 			log.RootLogger().Debug("Data is determined to be a slice/array and is being converted to tf.tensor")
-			inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
-			if err != nil {
-				return nil, fmt.Errorf("unable to convert slice to tensor: %s",err)
+
+			datainfo := model.Metadata.Inputs.Features[inputName]
+			typ := datainfo.Type
+			rank := len(datainfo.Shape)
+			fmt.Println(typ, rank)
+			switch datainfo.Type {
+			case "DT_DOUBLE":
+				if rank == 2 {
+					var in [][]float64
+					for _, val := range model.Inputs[inputName].([]interface{}) {
+						fmt.Println(i, len(val.([]interface{})))
+						var in2 []float64
+						for _, val2 := range val.([]interface{}) {
+							tmp, _ := coerce.ToFloat64(val2)
+
+							in2 = append(in2, tmp)
+						}
+						in = append(in, in2)
+					}
+
+					inputs[inputMap.Output(0)], err = tf.NewTensor(in)
+					if err != nil {
+						return nil, fmt.Errorf("unable to convert slice to tensor: %s", err)
+					}
+				} else {
+					inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
+					if err != nil {
+						return nil, fmt.Errorf("unable to convert slice to tensor: %s", err)
+					}
+				}
+			default:
+				inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
+				if err != nil {
+					return nil, fmt.Errorf("unable to convert slice to tensor: %s", err)
+				}
 			}
 
 		case reflect.Ptr:
@@ -75,7 +111,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		default:
 
 			log.RootLogger().Info("Type not a Slice, Array, Map, or Pointer/Tensor, but still trying to make a tf.Tensor.")
-			log.RootLogger().Debug("model.Inputs[inputName] = ",model.Inputs[inputName])
+			log.RootLogger().Debug("model.Inputs[inputName] = ", model.Inputs[inputName])
 			inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
 			if err != nil {
 				return nil, err
