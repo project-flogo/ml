@@ -27,8 +27,6 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		if validateOperation(v.Name, savedModel) == false {
 			return nil, fmt.Errorf("Invalid operation %s", v.Name)
 		}
-		fmt.Println(k, v.Name, v.Type, v.Shape)
-		// inputOpsType[v.Name] = v.Type
 		inputOps[k] = savedModel.Graph.Operation(v.Name)
 	}
 
@@ -59,13 +57,11 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 			datainfo := model.Metadata.Inputs.Features[inputName]
 			typ := datainfo.Type
 			rank := len(datainfo.Shape)
-			fmt.Println(typ, rank)
-			switch datainfo.Type {
+			switch typ {
 			case "DT_DOUBLE":
 				if rank == 2 {
 					var in [][]float64
 					for _, val := range model.Inputs[inputName].([]interface{}) {
-						fmt.Println(i, len(val.([]interface{})))
 						var in2 []float64
 						for _, val2 := range val.([]interface{}) {
 							tmp, _ := coerce.ToFloat64(val2)
