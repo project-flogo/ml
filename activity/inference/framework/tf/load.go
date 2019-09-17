@@ -60,64 +60,15 @@ func parseProtoBuf(file string, model *models.Metadata) error {
 	if model.Inputs.Features == nil {
 		model.Inputs.Features = make(map[string]models.Feature)
 	}
-	var featureIndx = 0
-	for _, node := range metaGraphs[0].GetGraphDef().GetNode() {
-		// Grab dense features
-		if strings.Contains(node.GetName(), "ParseExample/ParseExample/dense_keys") {
-			k := string(node.GetAttr()["value"].GetTensor().GetStringVal()[0][:])
 
-			// Now determine the shape and type of each feature
-			for _, n2 := range metaGraphs[0].GetGraphDef().GetNode() {
-				if n2.GetName() == "ParseExample/ParseExample" {
-					var featureTyp string
-					var featureShape []int64
-
-					for attr, val := range n2.GetAttr() {
-
-						if attr == "Tdense" {
-							featureTyp = val.GetList().GetType()[featureIndx].String()
-						} else if attr == "_output_shapes" {
-							for i := 0; i < len(val.GetList().GetShape()[featureIndx].Dim); i++ {
-								featureShape = append(featureShape, val.GetList().GetShape()[featureIndx].Dim[i].GetSize())
-							}
-						}
-					}
-					feat := models.Feature{
-						Shape: featureShape,
-						Type:  featureTyp,
-					}
-
-					model.Inputs.Features[k] = feat
-				}
-			}
-
-			featureIndx++
+	for key,val := range inputs{
+		feat := models.Feature{
+			Name: val.Name,
+			Shape: val.Shape,
+			Type:  val.Type,
 		}
-
-		op := node.Op
-		if strings.Contains(op, "Placeholder") {
-			var featureTyp string
-			var featureShape []int64
-			nName := node.GetName()
-
-			for attr, val := range node.GetAttr() {
-				if attr == "dtype" {
-					featureTyp = val.GetType().String()
-				} else if attr == "_output_shapes" {
-					for i := 0; i < len(val.GetList().GetShape()[0].Dim); i++ {
-						featureShape = append(featureShape, val.GetList().GetShape()[0].Dim[i].GetSize())
-					}
-
-				}
-			}
-
-			feat := models.Feature{
-				Shape: featureShape,
-				Type:  featureTyp,
-			}
-
-			model.Inputs.Features[nName] = feat
-		}
+		// fmt.Println("load k=",k)
+		model.Inputs.Features[key] = feat
 	}
 
 	model.Inputs.Params = inputs

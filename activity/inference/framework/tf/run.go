@@ -21,7 +21,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 	var outputOps []tf.Output
 
 	// Validate that the operations exsist and create operation
-	for k, v := range model.Metadata.Inputs.Params {
+	for k, v := range model.Metadata.Inputs.Features {
 		if validateOperation(v.Name, savedModel) == false {
 			return nil, fmt.Errorf("Invalid operation %s", v.Name)
 		}
@@ -53,7 +53,7 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 			log.RootLogger().Debug("Data is determined to be a slice/array and is being converted to tf.tensor")
 			inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("unable to convert slice to tensor: %s",err)
 			}
 
 		case reflect.Ptr:

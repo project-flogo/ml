@@ -13,6 +13,7 @@ type Metadata struct {
 }
 
 type Feature struct {
+	Name string
 	Shape []int64
 	Type  string
 }
