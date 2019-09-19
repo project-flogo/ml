@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/project-flogo/core/data/coerce"
 	"github.com/project-flogo/core/support/log"
 	models "github.com/project-flogo/ml/activity/inference/model"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
@@ -54,37 +53,28 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 		case reflect.Slice, reflect.Array:
 			log.RootLogger().Debug("Data is determined to be a slice/array and is being converted to tf.tensor")
 
-			datainfo := model.Metadata.Inputs.Features[inputName]
-			typ := datainfo.Type
-			rank := len(datainfo.Shape)
-			switch typ {
-			case "DT_DOUBLE":
-				if rank == 2 {
-					var in [][]float64
-					for _, val := range model.Inputs[inputName].([]interface{}) {
-						var in2 []float64
-						for _, val2 := range val.([]interface{}) {
-							tmp, _ := coerce.ToFloat64(val2)
+			typ := model.Metadata.Inputs.Features[inputName].Type
+			// shape := model.Metadata.Inputs.Features[inputName].Shape
+			rank := len(model.Metadata.Inputs.Features[inputName].Shape)
 
-							in2 = append(in2, tmp)
-						}
-						in = append(in, in2)
-					}
+			switch d := model.Inputs[inputName].(type) {
+			case []interface{}:
+				log.RootLogger().Debug("Input is of []interface{} type")
 
-					inputs[inputMap.Output(0)], err = tf.NewTensor(in)
-					if err != nil {
-						return nil, fmt.Errorf("unable to convert slice to tensor: %s", err)
-					}
-				} else {
-					inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
-					if err != nil {
-						return nil, fmt.Errorf("unable to convert slice to tensor: %s", err)
-					}
+				in, err := buildStructures(d, typ, rank)
+				if err != nil {
+					return nil, fmt.Errorf("unable to convert slice to rank %d %s tensor: %s", rank, typ, err)
+				}
+
+				inputs[inputMap.Output(0)], err = tf.NewTensor(in)
+				if err != nil {
+					return nil, fmt.Errorf("unable to convert slice to rank %d %s tensor: %s", rank, typ, err)
 				}
 			default:
-				inputs[inputMap.Output(0)], err = tf.NewTensor(model.Inputs[inputName])
+				log.RootLogger().Debug("Input is of default type (probably something like [][]float64")
+				inputs[inputMap.Output(0)], err = tf.NewTensor(d)
 				if err != nil {
-					return nil, fmt.Errorf("unable to convert slice to tensor: %s", err)
+					return nil, fmt.Errorf("unable to convert slice to rank %d %s tensor: %s", rank, typ, err)
 				}
 			}
 
@@ -171,7 +161,8 @@ func getTensorValue(tensor *tf.Tensor) interface{} {
 	case []int:
 		return tensor.Value().([]int)
 	}
-	return nil
+
+	return tensor.Value()
 }
 
 func createInputExampleTensor(featMap interface{}) (*tf.Tensor, error) {
