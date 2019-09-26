@@ -9,8 +9,8 @@ import (
 	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support/test"
 	"github.com/project-flogo/ml/activity/inference/framework/tf"
-	tfactual "github.com/tensorflow/tensorflow/tensorflow/go"
 	"github.com/stretchr/testify/assert"
+	tfactual "github.com/tensorflow/tensorflow/tensorflow/go"
 )
 
 var _ tf.TensorflowModel
@@ -57,8 +57,8 @@ func TestDNNEstimator(t *testing.T) {
 	fmt.Println("blah")
 
 	done, err = act.Eval(tc)
-	out:=tc.GetOutput("result")
-	if out.(map[string]interface{})["outputs"]==nil {
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["outputs"] == nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -143,8 +143,8 @@ func TestPairwaiseMul(t *testing.T) {
 	tc.SetInput("features", features2)
 
 	done, err = act.Eval(tc)
-	out:=tc.GetOutput("result")
-	if out.(map[string]interface{})["pred"]==nil {
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["pred"] == nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -184,8 +184,8 @@ func TestCNNModel(t *testing.T) {
 	tc.SetInput("features", features3)
 
 	done, err = act.Eval(tc)
-	out:=tc.GetOutput("result")
-	if out.(map[string]interface{})["pred"]==nil {
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["pred"] == nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -210,9 +210,9 @@ func TestByteModel(t *testing.T) {
 	fmt.Println("Unit test of passing byte to model")
 	tc.SetInput("model", "testModels/Archive_byte_test_model.zip")
 
-	d:=[]int32{1,2,3,4,5,10}
-	data,err:=tfactual.NewTensor(d)
-	if err!=nil{
+	d := []int32{1, 2, 3, 4, 5, 10}
+	data, err := tfactual.NewTensor(d)
+	if err != nil {
 		fmt.Println("problem loading TF Tensor")
 	}
 
@@ -229,8 +229,8 @@ func TestByteModel(t *testing.T) {
 	tc.SetInput("features", features3)
 
 	done, err = act.Eval(tc)
-	out:=tc.GetOutput("result")
-	if out.(map[string]interface{})["out"]==nil {
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["out"] == nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -274,8 +274,8 @@ func TestEstimatorClassifier(t *testing.T) {
 	tc.SetInput("features", featuresA)
 
 	done, err = act.Eval(tc)
-	out:=tc.GetOutput("result")
-	if out.(map[string]interface{})["0"]==nil {
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["0"] == nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -328,8 +328,8 @@ func TestCNNModel2(t *testing.T) {
 	tc.SetInput("features", features3)
 
 	done, err = act.Eval(tc)
-	out:=tc.GetOutput("result")
-	if out.(map[string]interface{})["pred"]==nil {
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["pred"] == nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
@@ -338,7 +338,6 @@ func TestCNNModel2(t *testing.T) {
 	//check result attr
 	fmt.Println(tc.GetOutput("result"))
 }
-
 
 func TestEstimatorClassifierTESTING(t *testing.T) {
 
@@ -363,7 +362,7 @@ func TestEstimatorClassifierTESTING(t *testing.T) {
 
 	var featuresA []interface{}
 	featuresA = append(featuresA, map[string]interface{}{
-		"name": "inputs", //"one",
+		"name": "inputs",   //"one",
 		"data": estInputsA, // 0.140586,
 	})
 
@@ -373,17 +372,151 @@ func TestEstimatorClassifierTESTING(t *testing.T) {
 	tc.SetInput("tag", "serve")
 	tc.SetInput("features", featuresA)
 
-	testval:= make(map[string]interface{})
-	testval["0"]=0.32395765
-	testval["1"]=0.3435985
-	testval["2"]=0.33244383
+	testval := make(map[string]interface{})
+	testval["0"] = 0.32395765
+	testval["1"] = 0.3435985
+	testval["2"] = 0.33244383
 
 	done, err = act.Eval(tc)
-	out:=tc.GetOutput("result")
-	fmt.Println(out)
-	if out.(map[string]interface{})["0"]==nil {
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["0"] == nil {
 		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
 	} else {
 		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
 	}
+}
+
+func TestFloat64Rank5InterfaceIn(t *testing.T) {
+
+	var done bool
+	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
+
+	// Unit test ofSimple CNN model
+	fmt.Println("Unit TestFloat64Rank5 with interface input")
+	tc.SetInput("model", "testModels/Archive_float64.zip")
+
+	in := []interface{}{
+		[]interface{}{
+			[]interface{}{[]interface{}{[]interface{}{0.8931730159926226, 0.5311302512161289}}},
+		},
+	}
+
+	var features3 []interface{}
+	features3 = append(features3, map[string]interface{}{
+		"name": "inputs",
+		"data": in,
+	})
+
+	tc.SetInput("inputName", "inputs")
+	tc.SetInput("framework", "Tensorflow")
+	tc.SetInput("sigDefName", "serving_default")
+	tc.SetInput("tag", "serve")
+	tc.SetInput("features", features3)
+
+	done, err = act.Eval(tc)
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["Yout"] == nil {
+		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
+	} else {
+		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
+	}
+
+}
+
+func TestFloat64Rank5DoubleIn(t *testing.T) {
+
+	var done bool
+	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
+
+	// Unit test ofSimple CNN model
+	fmt.Println("Unit TestFloat64Rank5 with Double input")
+	tc.SetInput("model", "testModels/Archive_float64.zip")
+
+	in := [][][][][]float64{{{{{0.7814656252241947, 0.28796209040538656}}}}}
+
+	var features3 []interface{}
+	features3 = append(features3, map[string]interface{}{
+		"name": "inputs",
+		"data": in,
+	})
+
+	tc.SetInput("inputName", "inputs")
+	tc.SetInput("framework", "Tensorflow")
+	tc.SetInput("sigDefName", "serving_default")
+	tc.SetInput("tag", "serve")
+	tc.SetInput("features", features3)
+
+	done, err = act.Eval(tc)
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["Yout"] == nil {
+		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
+	} else {
+		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
+	}
+
+}
+
+func TestCNNModelInterfaceIn(t *testing.T) {
+
+	var done bool
+	var err error
+
+	mf := mapper.NewFactory(resolve.GetBasicResolver())
+	iCtx := test.NewActivityInitContext(&Settings{}, mf)
+	act, err := New(iCtx)
+
+	tc := test.NewActivityContext(act.Metadata())
+
+	// Unit test ofSimple CNN model
+	fmt.Println("Unit test of simple CNN model - with data formated as an interface")
+	tc.SetInput("model", "testModels/Archive_simpleCNN.zip")
+
+	// var in interface{}
+	in := []interface{}{
+		[]interface{}{
+			[]interface{}{[]interface{}{0.0000000856947568}},
+			[]interface{}{[]interface{}{0.00000331318370}},
+			[]interface{}{[]interface{}{0.0000858655563}},
+			[]interface{}{[]interface{}{0.00149167657}},
+			[]interface{}{[]interface{}{0.0173705094}},
+			[]interface{}{[]interface{}{0.135591557}},
+			[]interface{}{[]interface{}{0.709471493}},
+			[]interface{}{[]interface{}{2.48839579}},
+			[]interface{}{[]interface{}{5.85040827}},
+			[]interface{}{[]interface{}{9.22008867}},
+		},
+	}
+
+	var features3 []interface{}
+	features3 = append(features3, map[string]interface{}{
+		"name": "X",
+		"data": in,
+	})
+
+	tc.SetInput("inputName", "inputs")
+	tc.SetInput("framework", "Tensorflow")
+	tc.SetInput("sigDefName", "serving_default")
+	tc.SetInput("tag", "serve")
+	tc.SetInput("features", features3)
+
+	done, err = act.Eval(tc)
+	out := tc.GetOutput("result")
+	if out.(map[string]interface{})["pred"] == nil {
+		assert.Fail(t, fmt.Sprintf("Error raised: %s", err))
+	} else {
+		assert.True(t, done, fmt.Sprintf("Evaluation came back: %t", done))
+	}
+
 }
