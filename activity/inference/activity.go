@@ -106,14 +106,14 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 		featMap := feat.(map[string]interface{})
 		inputName := featMap["name"].(string)
 		inmodel := false
-		for key := range tfmodelmap[modelKey].Metadata.Inputs.Features{
-			if key==inputName{
+		for key := range tfmodelmap[modelKey].Metadata.Inputs.Features {
+			if key == inputName {
 				inputSample[inputName] = featMap["data"]
-				inmodel=true
+				inmodel = true
 			}
 		}
-		if !inmodel{
-			return false,fmt.Errorf("%s not an input into model",featMap["name"].(string))
+		if !inmodel {
+			return false, fmt.Errorf("%s not an input into model", featMap["name"].(string))
 		}
 	}
 
@@ -130,7 +130,6 @@ func (a *Activity) Eval(context activity.Context) (done bool, err error) {
 
 	log.Debug("Model execution completed with result:")
 	log.Debug(output)
-
 
 	if strings.Contains(tfmodelmap[modelKey].Metadata.Method, "tensorflow/serving/classify") {
 		var out = make(map[string]interface{})

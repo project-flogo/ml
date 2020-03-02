@@ -54,21 +54,17 @@ func (i *TensorflowModel) Run(model *models.Model) (out map[string]interface{}, 
 			log.RootLogger().Debug("Data is determined to be a slice/array and is being converted to tf.tensor")
 
 			typ := model.Metadata.Inputs.Features[inputName].Type
-			// shape := model.Metadata.Inputs.Features[inputName].Shape
 			rank := len(model.Metadata.Inputs.Features[inputName].Shape)
-
 			switch d := model.Inputs[inputName].(type) {
 			case []interface{}:
-				log.RootLogger().Debug("Input is of []interface{} type")
-
-				in, err := buildStructures(d, typ, rank)
+				log.RootLogger().Debug("Input is a slice/array (probably something like [][]float64")
+				builtstruc, err := buildStructures(model.Inputs[inputName].([]interface{}), typ, rank)
 				if err != nil {
 					return nil, fmt.Errorf("unable to convert slice to rank %d %s tensor: %s", rank, typ, err)
 				}
-
-				inputs[inputMap.Output(0)], err = tf.NewTensor(in)
+				inputs[inputMap.Output(0)], err = tf.NewTensor(builtstruc)
 				if err != nil {
-					return nil, fmt.Errorf("unable to convert slice to rank %d %s tensor: %s", rank, typ, err)
+					return nil, fmt.Errorf(" unable to convert slice to rank %d %s tensor: %s", rank, typ, err)
 				}
 			default:
 				log.RootLogger().Debug("Input is of default type (probably something like [][]float64")
