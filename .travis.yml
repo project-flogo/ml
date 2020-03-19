@@ -6,8 +6,6 @@ os:
   
 env:
   - GO111MODULE=on
-git:
-  depth: 1
 
 install: 
   - TF_TYPE="cpu"
