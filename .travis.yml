@@ -1,0 +1,22 @@
+language: go
+go:
+  - 1.12.x
+os:
+  - linux
+  
+env:
+  - GO111MODULE=on
+
+install: 
+  - TF_TYPE="cpu"
+  - mkdir tensorflow_libs
+  - cd tensorflow_libs
+  - TARGET_DIRECTORY=$(pwd)
+  - curl -L "https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-${TF_TYPE}-$(go env GOOS)-x86_64-1.15.0.tar.gz" | tar -C $TARGET_DIRECTORY -xz
+  - cd ..
+  - export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIRECTORY/lib
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIRECTORY/lib
+  - go get github.com/tensorflow/tensorflow/tensorflow/go 
+
+script:
+  - go test ./activity/inference/...
